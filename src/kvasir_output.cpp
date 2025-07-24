@@ -19,10 +19,11 @@ struct kvasir_output : public output_format {
 
     std::string get_description() override { return "C++ header suitable for use with Kvasir"; }
 
-    void output_symbols(FILE* out, std::vector<compiled_source::symbol> const& symbols) {
+    void output_symbols(FILE*                                       out,
+                        std::vector<compiled_source::symbol> const& symbols) {
         for(auto const& s : symbols) {
             if(!s.is_label) {
-    fprintf(out, "static constexpr auto %s{%d};\n", s.name.c_str(), s.value);
+                fprintf(out, "static constexpr auto %s{%d};\n", s.name.c_str(), s.value);
             }
         }
         for(auto const& s : symbols) {
@@ -32,10 +33,9 @@ struct kvasir_output : public output_format {
         }
     }
 
-    int output(
-      std::string              destination,
-      std::vector<std::string> output_options,
-      compiled_source const&   source) override {
+    int output(std::string              destination,
+               std::vector<std::string> output_options,
+               compiled_source const&   source) override {
         for(auto const& program : source.programs) {
             for(auto const& p : program.lang_opts) {
                 if(p.first.size() >= name.size() && p.first.compare(0, name.size(), name) == 0) {
@@ -46,7 +46,9 @@ struct kvasir_output : public output_format {
         }
 
         FILE* out = open_single_output(destination);
-        if(!out) return 1;
+        if(!out) {
+            return 1;
+        }
 
         fprintf(out, "#pragma once\n");
         fprintf(out, "#include <array>\n");
@@ -86,8 +88,35 @@ struct kvasir_output : public output_format {
 
             fprintf(out, "static constexpr auto WrapTarget{%d};\n", program.wrap_target);
             fprintf(out, "static constexpr auto Wrap{%d};\n", program.wrap);
+            fprintf(out, "static constexpr auto PioVersion{%d};\n", program.pio_version);
+            fprintf(out, "static constexpr auto ClockDivInt{%d};\n", program.clock_div_int);
+            fprintf(out, "static constexpr auto ClockDivFrac{%d};\n", program.clock_div_frac);
+            
+            const char* fifo_mode_str;
+            switch(program.fifo) {
+                case fifo_config::txrx:   fifo_mode_str = "TxRx"; break;
+                case fifo_config::tx:     fifo_mode_str = "Tx"; break;
+                case fifo_config::rx:     fifo_mode_str = "Rx"; break;
+                case fifo_config::txget:  fifo_mode_str = "TxGet"; break;
+                case fifo_config::txput:  fifo_mode_str = "TxPut"; break;
+                case fifo_config::putget: fifo_mode_str = "PutGet"; break;
+                default: fifo_mode_str = "Unknown"; break;
+            }
+            fprintf(out, "static constexpr auto FifoMode{%d}; // %s\n", (int)program.fifo, fifo_mode_str);
+            fprintf(out, "static constexpr auto UsedGpioRanges{0x%02x};\n", program.used_gpio_ranges);
+            fprintf(out, "static constexpr auto MovStatusType{%d};\n", program.mov_status_type);
+            fprintf(out, "static constexpr auto MovStatusN{%d};\n", program.mov_status_n);
+            fprintf(out, "static constexpr auto SetCount{%d};\n", program.set_count);
+            fprintf(out, "static constexpr auto InPinCount{%d};\n", program.in.pin_count);
+            fprintf(out, "static constexpr auto InRight{%s};\n", program.in.right ? "true" : "false");
+            fprintf(out, "static constexpr auto InAutoP{%s};\n", program.in.autop ? "true" : "false");
+            fprintf(out, "static constexpr auto InThreshold{%d};\n", program.in.threshold);
+            fprintf(out, "static constexpr auto OutPinCount{%d};\n", program.out.pin_count);
+            fprintf(out, "static constexpr auto OutRight{%s};\n", program.out.right ? "true" : "false");
+            fprintf(out, "static constexpr auto OutAutoP{%s};\n", program.out.autop ? "true" : "false");
+            fprintf(out, "static constexpr auto OutThreshold{%d};\n", program.out.threshold);
 
-            fprintf(out, "\n");/*
+            fprintf(out, "\n"); /*
             fprintf(out, "//static constexpr auto get_default_config(std::uint16_t offset) {\n");
             fprintf(out, "//pio_sm_config c = pio_get_default_sm_config();\n");
             fprintf(out, "//sm_config_set_wrap(&c, offset + WrapTarget, offset + Wrap);\n");
@@ -127,3 +156,4 @@ struct kvasir_output : public output_format {
 };
 
 static kvasir_output::factory creator;
+

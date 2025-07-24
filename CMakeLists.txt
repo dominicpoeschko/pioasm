@@ -31,7 +31,7 @@ mark_as_advanced(FORCE clang-format)
 function(pioasm_generate targetname)
 
   cmake_parse_arguments(PARSE_ARGV 1 PARSED_ARGS ""
-      "INPUT_FILE" "")
+      "INPUT_FILE;PIO_VERSION" "")
 
   if(PARSED_ARGS_UNPARSED_ARGUMENTS)
     message(FATAL_ERROR "unknown argument ${PARSED_ARGS_UNPARSED_ARGUMENTS}")
@@ -39,6 +39,10 @@ function(pioasm_generate targetname)
 
   if(NOT PARSED_ARGS_INPUT_FILE)
       message(FATAL_ERROR "pioasm needs INPUT_FILE")
+  endif()
+
+  if(NOT PARSED_ARGS_PIO_VERSION)
+      set(PARSED_ARGS_PIO_VERSION 1)
   endif()
 
   set(iname ${CMAKE_CURRENT_SOURCE_DIR}/${PARSED_ARGS_INPUT_FILE})
@@ -56,7 +60,7 @@ function(pioasm_generate targetname)
     set(pioasm_bin ${build_dir}/host_build/pioasm)
   endif()
 
-  set(command ${pioasm_bin} ${iname} ${oname})
+  set(command ${pioasm_bin} -o kvasir -v ${PARSED_ARGS_PIO_VERSION} ${iname} ${oname})
 
 if(NOT EXISTS ${clang-format})
     add_custom_command(
