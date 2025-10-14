@@ -17,7 +17,36 @@ if(NOT CMAKE_CROSSCOMPILING)
 
     target_include_directories(pioasm PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src)
 
-    target_compile_options(pioasm PRIVATE -Wno-shadow -Wno-unused-parameter -Wno-sign-conversion)
+    target_compile_options(
+        pioasm
+        PRIVATE -Wno-shadow
+                -Wno-unused-parameter
+                -Wno-sign-conversion
+                -Wno-conversion
+                -Wno-sign-compare
+                -Wno-old-style-cast
+                -Wno-missing-field-initializers
+                -Wno-covered-switch-default
+                -Wno-deprecated-copy-with-dtor
+                -Wno-exit-time-destructors
+                -Wno-extra-semi-stmt
+                -Wno-format
+                -Wno-global-constructors
+                -Wno-missing-prototypes
+                -Wno-newline-eof
+                -Wno-non-virtual-dtor
+                -Wno-reserved-identifier
+                -Wno-reserved-macro-identifier
+                -Wno-suggest-destructor-override
+                -Wno-switch-enum
+                -Wno-unreachable-code
+                -Wno-unreachable-code-break
+                -Wno-unsafe-buffer-usage
+                -Wno-unused-but-set-variable
+                -Wno-unused-macros
+                -Wno-unused-variable
+                -Wno-zero-as-null-pointer-constant
+                -Wno-delete-non-abstract-non-virtual-dtor)
 
 else()
     include(cmake_helpers/HostBuild.cmake)
