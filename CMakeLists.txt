@@ -72,7 +72,19 @@ function(pioasm_generate targetname)
         set(PARSED_ARGS_PIO_VERSION 1)
     endif()
 
-    set(iname ${CMAKE_CURRENT_SOURCE_DIR}/${PARSED_ARGS_INPUT_FILE})
+    # Handle different path types: absolute, relative, and variable-expanded paths
+    if(IS_ABSOLUTE ${PARSED_ARGS_INPUT_FILE})
+        # Path is already absolute, use as-is
+        set(iname ${PARSED_ARGS_INPUT_FILE})
+    elseif(EXISTS ${PARSED_ARGS_INPUT_FILE})
+        # Path exists as-is (likely from variable expansion like ${CHIP_ROOT}/...) Convert to absolute path to avoid
+        # issues
+        get_filename_component(iname ${PARSED_ARGS_INPUT_FILE} ABSOLUTE)
+    else()
+        # Treat as relative to current source directory
+        set(iname ${CMAKE_CURRENT_SOURCE_DIR}/${PARSED_ARGS_INPUT_FILE})
+    endif()
+
     set(incname ${CMAKE_CURRENT_BINARY_DIR}/pioasm_generated)
     set(dname ${incname}/${targetname})
 
