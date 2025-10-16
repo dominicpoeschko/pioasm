@@ -46,7 +46,8 @@ if(NOT CMAKE_CROSSCOMPILING)
                 -Wno-unused-macros
                 -Wno-unused-variable
                 -Wno-zero-as-null-pointer-constant
-                -Wno-delete-non-abstract-non-virtual-dtor)
+                -Wno-delete-non-abstract-non-virtual-dtor
+                -Wno-missing-noreturn)
 
 else()
     include(cmake_helpers/HostBuild.cmake)
