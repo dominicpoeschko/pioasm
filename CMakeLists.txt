@@ -4,11 +4,18 @@ if(TARGET pioasm)
     return()
 endif()
 
+include(FetchContent)
+FetchContent_Declare(
+    cmake_helpers
+    GIT_REPOSITORY https://github.com/dominicpoeschko/cmake_helpers.git
+    GIT_TAG master)
+FetchContent_MakeAvailable(cmake_helpers)
+
 if(NOT CMAKE_CROSSCOMPILING)
 
     project(pioasm)
 
-    include(cmake_helpers/BuildOptions.cmake)
+    include(${cmake_helpers_SOURCE_DIR}/BuildOptions.cmake)
 
     add_executable(pioasm src/main.cpp src/pio_assembler.cpp src/pio_disassembler.cpp src/gen/lexer.cpp
                           src/gen/parser.cpp src/kvasir_output.cpp)
@@ -50,7 +57,7 @@ if(NOT CMAKE_CROSSCOMPILING)
                 -Wno-missing-noreturn)
 
 else()
-    include(cmake_helpers/HostBuild.cmake)
+    include(${cmake_helpers_SOURCE_DIR}/HostBuild.cmake)
     configure_host_build(pioasm)
 endif()
 
