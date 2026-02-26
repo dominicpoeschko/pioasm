@@ -104,7 +104,7 @@ function(pioasm_generate targetname)
     if(NOT CMAKE_CROSSCOMPILING)
         set(pioasm_bin ${build_dir}/pioasm)
     else()
-        set(pioasm_bin ${build_dir}/host_build/pioasm)
+        get_target_property(pioasm_bin pioasm HOST_EXECUTABLE_PATH)
     endif()
 
     set(command
