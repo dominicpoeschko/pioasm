@@ -7,6 +7,7 @@
 #ifndef _PIO_TYPES_H
 #define _PIO_TYPES_H
 
+#include <cstdint>
 #include <string>
 #include <map>
 #include <set>
@@ -14,7 +15,7 @@
 #include <vector>
 #include <memory>
 
-#include "gen/location.h"
+#include "location.h"
 #include "pio_enums.h"
 
 struct src_item {

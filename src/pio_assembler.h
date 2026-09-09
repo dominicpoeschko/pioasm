@@ -8,7 +8,7 @@
 #define _PIO_ASSEMBLER_H
 
 #include <algorithm>
-#include "gen/parser.hpp"
+#include "parser.hpp"
 #include "output_format.h"
 
 // Give Flex the prototype of yylex we want ...

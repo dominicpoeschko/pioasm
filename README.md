@@ -1,6 +1,6 @@
 # PIOasm with Kvasir Output
 
-A copy of the pioasm tool from pico_sdk with added Kvasir output format support. This tool assembles PIO (Programmable I/O) programs for the Raspberry Pi Pico/RP2040/RP2350 microcontrollers and generates C++ headers suitable for use with the [Kvasir](https://github.com/kvasir-io/Kvasir) register access library.
+A copy of the pioasm tool from pico_sdk with added Kvasir output format support. The sources under `src/` (including `gen/`, `parser.yy`, `lexer.ll`) are pico-sdk 2.3.1's `tools/pioasm` byte for byte; `kvasir_output.cpp` is the addition and the other upstream output formats are left out. To move to a newer pico-sdk, copy the files over again and bump `PIOASM_VERSION_STRING` in `CMakeLists.txt`. This tool assembles PIO (Programmable I/O) programs for the Raspberry Pi Pico/RP2040/RP2350 microcontrollers and generates C++ headers suitable for use with the [Kvasir](https://github.com/kvasir-io/Kvasir) register access library.
 
 ## Features
 

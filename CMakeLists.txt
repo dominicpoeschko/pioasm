@@ -22,7 +22,20 @@ if(NOT CMAKE_CROSSCOMPILING)
 
     target_add_default_build_options(pioasm PRIVATE)
 
-    target_include_directories(pioasm PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src)
+    # The sources under src/ are pico-sdk's tools/pioasm, verbatim (kvasir_output.cpp is the addition);
+    # this is the upstream version they were taken from, reported by `pioasm --version`.
+    if(NOT PIOASM_VERSION_STRING)
+        set(PIOASM_VERSION_STRING "2.3.1")
+    endif()
+    configure_file(${CMAKE_CURRENT_LIST_DIR}/src/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
+
+    # Just GCC 15.1 I think, but harmless on other versions (upstream's workaround)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_compile_definitions(pioasm PRIVATE _GTHREAD_USE_COND_INIT_FUNC)
+    endif()
+
+    target_include_directories(pioasm PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src ${CMAKE_CURRENT_LIST_DIR}/src/gen
+                                              ${CMAKE_CURRENT_BINARY_DIR})
 
     target_compile_options(
         pioasm

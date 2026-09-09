@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <iterator>
 #include "pio_assembler.h"
-#include "gen/parser.hpp"
+#include "parser.hpp"
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4996) // fopen
