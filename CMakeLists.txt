@@ -89,7 +89,8 @@ function(pioasm_generate targetname)
         message(FATAL_ERROR "pioasm needs INPUT_FILE")
     endif()
 
-    if(NOT PARSED_ARGS_PIO_VERSION)
+    # "0" is false to if(NOT ...): test DEFINED, or PIO_VERSION 0 silently becomes 1
+    if(NOT DEFINED PARSED_ARGS_PIO_VERSION)
         set(PARSED_ARGS_PIO_VERSION 1)
     endif()
 

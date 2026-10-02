@@ -45,6 +45,27 @@ struct kvasir_output : public output_format {
             }
         }
 
+        // pioasm stores bit 5 of a `wait gpio` number (GPIO 32..47, PIO version 1) above the
+        // 16-bit word, for pico-sdk's loader to resolve against the PIO's GPIO base. A Kvasir
+        // header holds the words as they go into instruction memory, so such a program has no
+        // valid header: refuse it instead of writing one that does not compile.
+        for(auto const& program : source.programs) {
+            // `std::array Instructions{}` of nothing does not compile, and there is nothing to load
+            if(program.instructions.empty()) {
+                std::cerr << "error: program " << program.name << " has no instructions\n";
+                return 1;
+            }
+            for(auto const inst : program.instructions) {
+                if(inst > 0xFFFFu) {
+                    std::cerr << "error: program " << program.name
+                              << ": 'wait gpio' above 31 cannot be written to a Kvasir header; "
+                                 "set the PIO's GPIO window (GPIOBASE 16) and wait on the GPIO's "
+                                 "number minus 16\n";
+                    return 1;
+                }
+            }
+        }
+
         FILE* out = open_single_output(destination);
         if(!out) {
             return 1;
@@ -115,6 +136,15 @@ struct kvasir_output : public output_format {
             fprintf(out, "static constexpr auto OutRight{%s};\n", program.out.right ? "true" : "false");
             fprintf(out, "static constexpr auto OutAutoP{%s};\n", program.out.autop ? "true" : "false");
             fprintf(out, "static constexpr auto OutThreshold{%d};\n", program.out.threshold);
+            // .side_set N [opt] [pindirs]: N side-set pins, the enable bit not counted (it is
+            // PINCTRL.SIDESET_COUNT = N + 1 with opt); 0 / false / false without .side_set
+            int const  sidesetBits = program.sideset_bits_including_opt.get();
+            bool const sidesetOpt  = program.sideset_bits_including_opt.is_specified() && program.sideset_opt;
+            fprintf(out, "static constexpr auto SidesetCount{%d};\n", sidesetBits - (sidesetOpt ? 1 : 0));
+            fprintf(out, "static constexpr auto SidesetOptional{%s};\n", sidesetOpt ? "true" : "false");
+            fprintf(out, "static constexpr auto SidesetPindirs{%s};\n", program.sideset_pindirs ? "true" : "false");
+            // .origin: the slot the program must be loaded at, -1 when it may go anywhere
+            fprintf(out, "static constexpr auto Origin{%d};\n", program.origin.get());
 
             fprintf(out, "\n"); /*
             fprintf(out, "//static constexpr auto get_default_config(std::uint16_t offset) {\n");
