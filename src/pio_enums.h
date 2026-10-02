@@ -10,11 +10,11 @@
 typedef unsigned int uint;
 
 enum struct fifo_config {
-    txrx = 0,
-    tx = 1,
-    rx = 2,
-    txget = 3,
-    txput = 4,
+    txrx   = 0,
+    tx     = 1,
+    rx     = 2,
+    txget  = 3,
+    txput  = 4,
     putget = 5,
 };
 

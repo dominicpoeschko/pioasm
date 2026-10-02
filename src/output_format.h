@@ -7,92 +7,102 @@
 #ifndef _OUTPUT_FORMAT_H
 #define _OUTPUT_FORMAT_H
 
-#include <cstdint>
-#include <vector>
-#include <map>
-#include <string>
-#include <memory>
-
 #include "pio_enums.h"
+
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 typedef unsigned int uint;
 
 // can't use optional because we want to support older compilers
 template<typename T>
 struct simple_optional {
-    T value;
-    T default_value;
+    T    value;
+    T    default_value;
     bool specified;
 
-    simple_optional() : default_value(), specified(false) {}
+    simple_optional()
+      : default_value()
+      , specified(false) {}
 
-    simple_optional(const T &value) : value(value), specified(true) {}
+    simple_optional(T const& value)
+      : value(value)
+      , specified(true) {}
 
-    simple_optional<T> &operator=(const T &v) {
-        value = v;
+    simple_optional<T>& operator=(T const& v) {
+        value     = v;
         specified = true;
         return *this;
     }
 
-    operator bool() = delete; // confusing
-    const T &get() const { return specified ? value : default_value; }
+    operator bool() = delete;   // confusing
+
+    T const& get() const { return specified ? value : default_value; }
 
     bool is_specified() const { return specified; }
 
-    static simple_optional<T> with_default(const T &default_value) {
+    static simple_optional<T> with_default(T const& default_value) {
         simple_optional<T> rc;
         rc.default_value = default_value;
         return rc;
     }
 };
 
-typedef simple_optional<int> optional_int;
+typedef simple_optional<int>  optional_int;
 typedef simple_optional<bool> optional_bool;
 
 struct compiled_source {
     struct symbol {
         std::string name;
-        int value;
-        bool is_label;
+        int         value;
+        bool        is_label;
 
-        symbol(std::string name, int value, bool is_label) : name(std::move(name)), value(value), is_label(is_label) {}
+        symbol(std::string name,
+               int         value,
+               bool        is_label)
+          : name(std::move(name))
+          , value(value)
+          , is_label(is_label) {}
     };
 
     struct in_out {
-        int pin_count;
+        int  pin_count;
         bool right;
         bool autop;
-        int threshold;
+        int  threshold;
     };
 
     struct program {
-        std::string name;
-        optional_int origin = optional_int::with_default(-1);
-        optional_int sideset_bits_including_opt;
-        bool sideset_opt = false;
-        bool sideset_pindirs = false;
-        int wrap;
-        int wrap_target;
-        int pio_version;
-        int mov_status_type;
-        int mov_status_n;
-        in_out in;
-        in_out out;
-        int set_count;
-        uint clock_div_int;
-        uint clock_div_frac;
-        uint8_t used_gpio_ranges;
-        fifo_config fifo;
-        std::vector<uint> instructions;
-        std::vector<symbol> symbols; // public only
+        std::string                                     name;
+        optional_int                                    origin = optional_int::with_default(-1);
+        optional_int                                    sideset_bits_including_opt;
+        bool                                            sideset_opt     = false;
+        bool                                            sideset_pindirs = false;
+        int                                             wrap;
+        int                                             wrap_target;
+        int                                             pio_version;
+        int                                             mov_status_type;
+        int                                             mov_status_n;
+        in_out                                          in;
+        in_out                                          out;
+        int                                             set_count;
+        uint                                            clock_div_int;
+        uint                                            clock_div_frac;
+        uint8_t                                         used_gpio_ranges;
+        fifo_config                                     fifo;
+        std::vector<uint>                               instructions;
+        std::vector<symbol>                             symbols;   // public only
         std::map<std::string, std::vector<std::string>> code_blocks;
-        std::map<std::string, std::vector<std::pair<std::string,std::string>>> lang_opts;
+        std::map<std::string, std::vector<std::pair<std::string, std::string>>> lang_opts;
 
         // todo can't have wrap at -1
         program(std::string name) : name(std::move(name)) {}
     };
 
-    std::vector<symbol> global_symbols; // public only
+    std::vector<symbol>  global_symbols;   // public only
     std::vector<program> programs;
 };
 
@@ -101,22 +111,22 @@ struct output_format {
 
     std::string name;
 
-    static void add(output_format *lang) {
-        all().push_back(std::shared_ptr<output_format>(lang));
-    }
+    static void add(output_format* lang) { all().push_back(std::shared_ptr<output_format>(lang)); }
 
-    virtual int output(std::string destination, std::vector<std::string> output_options,
-                       const compiled_source &source) = 0;
+    virtual int output(std::string              destination,
+                       std::vector<std::string> output_options,
+                       compiled_source const&   source) = 0;
 
     virtual std::string get_description() = 0;
 
-    FILE *open_single_output(std::string destination);
+    FILE* open_single_output(std::string destination);
     virtual ~output_format() = default;
 
     static std::vector<std::shared_ptr<output_format>>& all() {
         static std::vector<std::shared_ptr<output_format>> output_formats;
         return output_formats;
     }
+
 protected:
     output_format(std::string name) : name(std::move(name)) {}
 };

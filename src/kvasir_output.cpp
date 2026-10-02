@@ -67,9 +67,7 @@ struct kvasir_output : public output_format {
         }
 
         FILE* out = open_single_output(destination);
-        if(!out) {
-            return 1;
-        }
+        if(!out) { return 1; }
 
         fprintf(out, "#pragma once\n");
         fprintf(out, "#include <array>\n");
@@ -90,9 +88,7 @@ struct kvasir_output : public output_format {
             fprintf(out, "static constexpr std::array Instructions{\n");
             for(int i = 0; i < (int)program.instructions.size(); i++) {
                 auto const& inst = program.instructions[i];
-                if(i == program.wrap_target) {
-                    fprintf(out, "//     .wrap_target\n");
-                }
+                if(i == program.wrap_target) { fprintf(out, "//     .wrap_target\n"); }
                 fprintf(
                   out,
                   "std::uint16_t{0x%04x}, // %2d: %s\n",
@@ -100,9 +96,7 @@ struct kvasir_output : public output_format {
                   i,
                   disassemble(inst, program.sideset_bits_including_opt.get(), program.sideset_opt)
                     .c_str());
-                if(i == program.wrap) {
-                    fprintf(out, "//     .wrap\n");
-                }
+                if(i == program.wrap) { fprintf(out, "//     .wrap\n"); }
             }
             fprintf(out, "};\n");
             fprintf(out, "\n");
@@ -112,37 +106,57 @@ struct kvasir_output : public output_format {
             fprintf(out, "static constexpr auto PioVersion{%d};\n", program.pio_version);
             fprintf(out, "static constexpr auto ClockDivInt{%d};\n", program.clock_div_int);
             fprintf(out, "static constexpr auto ClockDivFrac{%d};\n", program.clock_div_frac);
-            
-            const char* fifo_mode_str;
+
+            char const* fifo_mode_str;
             switch(program.fifo) {
-                case fifo_config::txrx:   fifo_mode_str = "TxRx"; break;
-                case fifo_config::tx:     fifo_mode_str = "Tx"; break;
-                case fifo_config::rx:     fifo_mode_str = "Rx"; break;
-                case fifo_config::txget:  fifo_mode_str = "TxGet"; break;
-                case fifo_config::txput:  fifo_mode_str = "TxPut"; break;
-                case fifo_config::putget: fifo_mode_str = "PutGet"; break;
-                default: fifo_mode_str = "Unknown"; break;
+            case fifo_config::txrx:   fifo_mode_str = "TxRx"; break;
+            case fifo_config::tx:     fifo_mode_str = "Tx"; break;
+            case fifo_config::rx:     fifo_mode_str = "Rx"; break;
+            case fifo_config::txget:  fifo_mode_str = "TxGet"; break;
+            case fifo_config::txput:  fifo_mode_str = "TxPut"; break;
+            case fifo_config::putget: fifo_mode_str = "PutGet"; break;
+            default:                  fifo_mode_str = "Unknown"; break;
             }
-            fprintf(out, "static constexpr auto FifoMode{%d}; // %s\n", (int)program.fifo, fifo_mode_str);
-            fprintf(out, "static constexpr auto UsedGpioRanges{0x%02x};\n", program.used_gpio_ranges);
+            fprintf(out,
+                    "static constexpr auto FifoMode{%d}; // %s\n",
+                    (int)program.fifo,
+                    fifo_mode_str);
+            fprintf(out,
+                    "static constexpr auto UsedGpioRanges{0x%02x};\n",
+                    program.used_gpio_ranges);
             fprintf(out, "static constexpr auto MovStatusType{%d};\n", program.mov_status_type);
             fprintf(out, "static constexpr auto MovStatusN{%d};\n", program.mov_status_n);
             fprintf(out, "static constexpr auto SetCount{%d};\n", program.set_count);
             fprintf(out, "static constexpr auto InPinCount{%d};\n", program.in.pin_count);
-            fprintf(out, "static constexpr auto InRight{%s};\n", program.in.right ? "true" : "false");
-            fprintf(out, "static constexpr auto InAutoP{%s};\n", program.in.autop ? "true" : "false");
+            fprintf(out,
+                    "static constexpr auto InRight{%s};\n",
+                    program.in.right ? "true" : "false");
+            fprintf(out,
+                    "static constexpr auto InAutoP{%s};\n",
+                    program.in.autop ? "true" : "false");
             fprintf(out, "static constexpr auto InThreshold{%d};\n", program.in.threshold);
             fprintf(out, "static constexpr auto OutPinCount{%d};\n", program.out.pin_count);
-            fprintf(out, "static constexpr auto OutRight{%s};\n", program.out.right ? "true" : "false");
-            fprintf(out, "static constexpr auto OutAutoP{%s};\n", program.out.autop ? "true" : "false");
+            fprintf(out,
+                    "static constexpr auto OutRight{%s};\n",
+                    program.out.right ? "true" : "false");
+            fprintf(out,
+                    "static constexpr auto OutAutoP{%s};\n",
+                    program.out.autop ? "true" : "false");
             fprintf(out, "static constexpr auto OutThreshold{%d};\n", program.out.threshold);
             // .side_set N [opt] [pindirs]: N side-set pins, the enable bit not counted (it is
             // PINCTRL.SIDESET_COUNT = N + 1 with opt); 0 / false / false without .side_set
             int const  sidesetBits = program.sideset_bits_including_opt.get();
-            bool const sidesetOpt  = program.sideset_bits_including_opt.is_specified() && program.sideset_opt;
-            fprintf(out, "static constexpr auto SidesetCount{%d};\n", sidesetBits - (sidesetOpt ? 1 : 0));
-            fprintf(out, "static constexpr auto SidesetOptional{%s};\n", sidesetOpt ? "true" : "false");
-            fprintf(out, "static constexpr auto SidesetPindirs{%s};\n", program.sideset_pindirs ? "true" : "false");
+            bool const sidesetOpt
+              = program.sideset_bits_including_opt.is_specified() && program.sideset_opt;
+            fprintf(out,
+                    "static constexpr auto SidesetCount{%d};\n",
+                    sidesetBits - (sidesetOpt ? 1 : 0));
+            fprintf(out,
+                    "static constexpr auto SidesetOptional{%s};\n",
+                    sidesetOpt ? "true" : "false");
+            fprintf(out,
+                    "static constexpr auto SidesetPindirs{%s};\n",
+                    program.sideset_pindirs ? "true" : "false");
             // .origin: the slot the program must be loaded at, -1 when it may go anywhere
             fprintf(out, "static constexpr auto Origin{%d};\n", program.origin.get());
 
@@ -178,12 +192,9 @@ struct kvasir_output : public output_format {
         }
         fprintf(out, "}\n");
         fprintf(out, "}\n");
-        if(out != stdout) {
-            fclose(out);
-        }
+        if(out != stdout) { fclose(out); }
         return 0;
     }
 };
 
 static kvasir_output::factory creator;
-

@@ -22,8 +22,8 @@ if(NOT CMAKE_CROSSCOMPILING)
 
     target_add_default_build_options(pioasm PRIVATE)
 
-    # The sources under src/ are pico-sdk's tools/pioasm, verbatim (kvasir_output.cpp is the addition);
-    # this is the upstream version they were taken from, reported by `pioasm --version`.
+    # The sources under src/ are pico-sdk's tools/pioasm, verbatim (kvasir_output.cpp is the addition); this is the
+    # upstream version they were taken from, reported by `pioasm --version`.
     if(NOT PIOASM_VERSION_STRING)
         set(PIOASM_VERSION_STRING "2.3.1")
     endif()
@@ -37,6 +37,26 @@ if(NOT CMAKE_CROSSCOMPILING)
     target_include_directories(pioasm PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src ${CMAKE_CURRENT_LIST_DIR}/src/gen
                                               ${CMAKE_CURRENT_BINARY_DIR})
 
+    # the warnings upstream's code gives under cmake_helpers' sets; the clang-only names are kept from gcc, which
+    # reports every unknown -Wno-* next to any other warning (and -Wmissing-prototypes is C-only there: its C++ name is
+    # -Wmissing-declarations)
+    set(pioasm_clang_only_warnings
+        -Wno-covered-switch-default
+        -Wno-deprecated-copy-with-dtor
+        -Wno-exit-time-destructors
+        -Wno-extra-semi-stmt
+        -Wno-global-constructors
+        -Wno-missing-prototypes
+        -Wno-newline-eof
+        -Wno-reserved-identifier
+        -Wno-reserved-macro-identifier
+        -Wno-suggest-destructor-override
+        -Wno-unreachable-code-break
+        -Wno-unsafe-buffer-usage
+        -Wno-delete-non-abstract-non-virtual-dtor
+        # clang 23: [[clang::lifetimebound]] advice on the bison output; clang 22 does not know the group
+        -Wno-unknown-warning-option
+        -Wno-lifetime-safety-suggestions)
     target_compile_options(
         pioasm
         PRIVATE -Wno-shadow
@@ -46,28 +66,17 @@ if(NOT CMAKE_CROSSCOMPILING)
                 -Wno-sign-compare
                 -Wno-old-style-cast
                 -Wno-missing-field-initializers
-                -Wno-covered-switch-default
-                -Wno-deprecated-copy-with-dtor
-                -Wno-exit-time-destructors
-                -Wno-extra-semi-stmt
                 -Wno-format
-                -Wno-global-constructors
-                -Wno-missing-prototypes
-                -Wno-newline-eof
                 -Wno-non-virtual-dtor
-                -Wno-reserved-identifier
-                -Wno-reserved-macro-identifier
-                -Wno-suggest-destructor-override
                 -Wno-switch-enum
                 -Wno-unreachable-code
-                -Wno-unreachable-code-break
-                -Wno-unsafe-buffer-usage
                 -Wno-unused-but-set-variable
                 -Wno-unused-macros
                 -Wno-unused-variable
                 -Wno-zero-as-null-pointer-constant
-                -Wno-delete-non-abstract-non-virtual-dtor
-                -Wno-missing-noreturn)
+                -Wno-missing-noreturn
+                $<$<CXX_COMPILER_ID:GNU>:-Wno-missing-declarations>
+                "$<$<CXX_COMPILER_ID:Clang,AppleClang>:${pioasm_clang_only_warnings}>")
 
 else()
     include(${cmake_helpers_SOURCE_DIR}/HostBuild.cmake)
